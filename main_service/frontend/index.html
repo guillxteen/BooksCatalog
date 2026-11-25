@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Личный каталог прочитанных и запланированных книг">
+  <title>BooksCatalog</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="/" aria-label="BooksCatalog — на главную">
+        <span class="brand-mark">B</span>
+        <span>BooksCatalog</span>
+      </a>
+      <div class="header-actions">
+        <button id="catalog-authors" class="button button-secondary" type="button">Каталог авторов</button>
+        <button id="add-book" class="button button-primary" type="button">Добавить книгу</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container page-content">
+    <section class="page-heading">
+      <div>
+        <h1>Мои книги</h1>
+      </div>
+      <button id="refresh-report" class="text-button" type="button">Обновить статистику</button>
+    </section>
+
+    <section class="summary" aria-label="Статистика каталога">
+      <article class="summary-card">
+        <span>Всего</span>
+        <strong id="total">—</strong>
+      </article>
+      <article class="summary-card">
+        <span>Прочитано</span>
+        <strong id="read">—</strong>
+      </article>
+      <article class="summary-card">
+        <span>В планах</span>
+        <strong id="unread">—</strong>
+      </article>
+    </section>
+
+    <section class="filters" aria-label="Поиск и фильтры">
+      <label class="field search-field">
+        <span>Поиск</span>
+        <input id="search" type="search" maxlength="200" placeholder="Название книги или автор">
+      </label>
+      <label class="field year-field">
+        <span>Год</span>
+        <input id="year-filter" type="number" min="0" max="2100" placeholder="Любой">
+      </label>
+      <label class="field status-field">
+        <span>Статус</span>
+        <select id="status-filter">
+          <option value="">Все книги</option>
+          <option value="true">Прочитано</option>
+          <option value="false">В планах</option>
+        </select>
+      </label>
+      <button id="reset-filters" class="button button-quiet" type="button">Сбросить</button>
+    </section>
+
+    <div class="catalog-heading">
+      <h2>Книги</h2>
+      <span id="result-count" aria-live="polite"></span>
+    </div>
+    <section id="books" class="book-grid" aria-live="polite" aria-busy="true"></section>
+  </main>
+
+  <dialog id="book-dialog" class="modal">
+    <form id="book-form" class="modal-form">
+      <div class="modal-header">
+        <div>
+          <h2 id="book-form-title">Новая книга</h2>
+          <p>Заполните сведения о книге.</p>
+        </div>
+        <button type="button" class="icon-button close" aria-label="Закрыть">×</button>
+      </div>
+      <input id="book-id" type="hidden">
+      <label class="field">
+        <span>Название <b aria-hidden="true">*</b></span>
+        <input id="title" maxlength="300" autocomplete="off" required>
+      </label>
+      <div class="form-row">
+        <label class="field">
+          <span>Год издания <b aria-hidden="true">*</b></span>
+          <input id="publication-year" type="number" min="0" max="2100" required>
+        </label>
+        <label class="checkbox-field">
+          <input id="is-read" type="checkbox">
+          <span>Книга прочитана</span>
+        </label>
+      </div>
+      <fieldset class="author-picker">
+        <legend>Авторы <b aria-hidden="true">*</b></legend>
+        <div id="author-options" class="author-options"></div>
+      </fieldset>
+      <label class="field">
+        <span>Краткое описание</span>
+        <textarea id="description" maxlength="10000" rows="5" placeholder="О чём эта книга"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary close">Отмена</button>
+        <button class="button button-primary" type="submit">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="authors-dialog" class="modal modal-wide">
+    <div class="modal-header">
+      <div>
+        <h2>Каталог авторов</h2>
+        <p>Добавляйте авторов и редактируйте сведения о них.</p>
+      </div>
+      <button type="button" class="icon-button close" aria-label="Закрыть">×</button>
+    </div>
+    <form id="author-form" class="author-form">
+      <input id="author-id" type="hidden">
+      <div class="author-form-fields">
+        <label class="field">
+          <span>Имя <b aria-hidden="true">*</b></span>
+          <input id="author-name" maxlength="200" autocomplete="off" required>
+        </label>
+        <label class="field">
+          <span>Краткая справка</span>
+          <textarea id="biography" maxlength="5000" rows="3"></textarea>
+        </label>
+      </div>
+      <div class="author-form-actions">
+        <button id="cancel-author-edit" class="button button-quiet hidden" type="button">Отменить изменение</button>
+        <button id="save-author" class="button button-primary" type="submit">Добавить автора</button>
+      </div>
+    </form>
+    <div class="section-divider"></div>
+    <div class="catalog-heading">
+      <h3>Сохранённые авторы</h3>
+      <span id="author-count"></span>
+    </div>
+    <div id="authors-list" class="authors-list" aria-live="polite"></div>
+  </dialog>
+
+  <dialog id="detail-dialog" class="modal detail-modal">
+    <div class="modal-header">
+      <div>
+        <span id="detail-status" class="status"></span>
+        <h2 id="detail-title"></h2>
+      </div>
+      <button type="button" class="icon-button close" aria-label="Закрыть">×</button>
+    </div>
+    <div id="detail-content" class="detail-content"></div>
+    <div class="modal-actions">
+      <button type="button" class="button button-secondary close">Закрыть</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
