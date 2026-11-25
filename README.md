@@ -101,18 +101,10 @@ BooksCatalog/
 │   ├── __init__.py
 │   └── Dockerfile
 │
-├── tests/
-│   ├── test_main_service.py
-│   ├── test_report_service.py
-│   └── test_project_structure.py
-│
 ├── .dockerignore
 ├── .gitignore
-├── COMPLIANCE.md
 ├── docker-compose.yml
 ├── requirements.txt
-├── requirements-dev.txt
-├── pytest.ini
 └── README.md
 ```
 
